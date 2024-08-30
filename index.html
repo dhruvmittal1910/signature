@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGNATURE</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #e96443, #904e95);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .main {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .canvas {
+            border: 3px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: #f3f3f3;
+            margin-bottom: 20px;
+        }
+
+        .top,
+        .bottom {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+
+        .block {
+            margin: 0 10px;
+            flex: 1;
+            color: #fff;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        select option {
+            color: #000; /* Text color of options */
+            background: #fff; /* Background color of options */
+        }
+        input[type="color"],
+        select,
+        button {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input[type="color"] {
+            cursor: pointer;
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #2575fc, #6a11cb);
+        }
+        .bottom>button{
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="top">
+            <div class="block">
+                <!-- text color -->
+                <p>SIGNATURE Color</p>
+                <input class="form-control" type="color" id="colorPicker" />
+            </div>
+
+            <div class="block">
+                <!-- background color -->
+                <p>Background Color</p>
+                <input class="form-control" type="color" id="colorPickBack" />
+            </div>
+
+            <div class="block">
+                <!-- font size -->
+                <p>Font Size</p>
+                <select id="fontSize">
+                    <option value="5px">5px</option>
+                    <option value="8px">8px</option>
+                    <option value="12px">12px</option>
+                    <option value="15px">15px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="25px">25px</option>
+                    <option value="28px">28px</option>
+                    <option value="30px">30px</option>
+                </select>
+            </div>
+        </div>
+        <!-- mid div -->
+
+        <canvas class="canvas" id="baseCanvas" width="800px" height="500px"></canvas>
+
+        <!-- bottom div -->
+        <div class="bottom">
+            <button type="btn btn-danger" id="clearButton">Clear Signature</button>
+            <button type="btn btn-success" id="saveButton">Save & Download</button>
+            <button type="btn btn-warning" id="retrieveButton">Retrieve old Signature</button>
+        </div>
+    </div>
+    <script>
+        const colorPicker = document.getElementById("colorPicker");
+        const canvasColor = document.getElementById("colorPickBack");
+        const fontPicker = document.getElementById("fontSize");
+        const canvas = document.getElementById("baseCanvas");
+        const clearButton = document.getElementById("clearButton");
+        const saveDownload = document.getElementById("saveButton")
+        const retrieveButton = document.getElementById("retrieveButton");
+
+        const c = canvas.getContext('2d');
+        colorPicker.addEventListener('change', (e) => {
+            c.strokeStyle = e.target.value;
+            c.fillStyle = e.target.value;
+        })
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            lastx = event.offsetX;
+            lasty = event.offsetY;
+        })
+
+        // draw line when mouse moves
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing) {
+                c.beginPath();
+                c.moveTo(lastx, lasty);
+                c.lineTo(event.offsetX, event.offsetY);
+                c.stroke();
+
+                lastx = event.offsetX;
+                lasty = event.offsetY;
+
+            }
+        })
+
+        canvas.addEventListener('mouseup', (e) => {
+            isDrawing = false;
+        })
+
+        canvasColor.addEventListener('change', (e) => {
+            c.fillStyle = e.target.value;
+            c.fillRect(0, 0, 800, 500)
+        })
+
+        fontPicker.addEventListener("change", (e) => {
+            c.lineWidth = e.target.value;
+        })
+
+        clearButton.addEventListener('click', () => {
+            c.clearRect(0, 0, 800, 500);
+
+        })
+
+
+        saveDownload.addEventListener('click', () => {
+            // save the item in localstorage to retrieve late
+            localStorage.setItem('canvasContents', canvas.toDataURL());
+            let link = document.createElement('a');
+            link.download = 'my-sign.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        })
+
+        retrieveButton.addEventListener('click', () => {
+            let savedSign = localStorage.getItem('canvasContents');
+            if (savedSign) {
+                let img = new Image();
+                img.src = savedSign;
+                c.drawImage(img, 0, 0);
+            }
+
+        })
+
+
+    </script>
+</body>
+
+</html>
